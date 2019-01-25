@@ -53,13 +53,21 @@
         {{ $link := .link }}
         {{ $scheme := (urls.Parse $link).Scheme }}
         {{ $target := "" }}
+        {{ $encode := .encode}}
         {{ if not $scheme }}
           {{ $link = .link | relLangURL }}
         {{ else if in (slice "http" "https") $scheme }}
           {{ $target = "target=\"_blank\" rel=\"noopener\"" }}
         {{ end }}
         <li>
-          <a itemprop="sameAs" href="{{ $link | safeURL }}" {{ $target | safeHTMLAttr }}>
+          {{ if $encode }}
+          <a itemprop="sameAs" href="mailto:fake@fakedomain.com"
+             onClick="this.href=this.href.replace('mailto:fake@fakedomain.com', window.atob('{{ $link | base64Encode | safeJS }}'))" 
+             {{ $target | safeHTMLAttr }}>
+          {{ else }}
+          <a itemprop="sameAs" href="{{ $link | safeHTML }}"
+             {{ $target | safeHTMLAttr }}>
+          {{ end }}
             <i class="{{ $pack }} {{ $pack_prefix }}-{{ .icon }} big-icon"></i>
           </a>
         </li>
